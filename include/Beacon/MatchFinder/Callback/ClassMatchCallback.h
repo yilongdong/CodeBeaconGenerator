@@ -1,4 +1,5 @@
 #pragma once
+#include <unordered_set>
 #include "clang/AST/Decl.h"
 #include "Beacon/MatchFinder/Callback/MatchCallbackBase.h"
 #include "Beacon/Model/CXXModel.h"
@@ -12,8 +13,8 @@ public:
   virtual ~ClassMatchCallback() = default;
   void run(clang::ast_matchers::MatchFinder::MatchResult const& Result) override;
 
-  void processMethod(clang::CXXMethodDecl const& methodDecl, cxxmodel::Class& clsModel);
-  void processFunctionParameter(clang::ParmVarDecl const& paramDecl, cxxmodel::Class::Method& methodModel);
+  static std::unordered_set<size_t> fileIDSet;
+  static std::unordered_set<int64_t> classIDSet;
 };
 
 } // namespace Callback

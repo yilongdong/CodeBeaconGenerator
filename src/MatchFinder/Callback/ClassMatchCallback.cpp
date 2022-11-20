@@ -1,77 +1,53 @@
 #include <iostream>
 
 #include "Beacon/MatchFinder/Callback/ClassMatchCallback.h"
+#include "Beacon/MatchFinder/Generator/ClassGenerator.h"
 #include "Beacon/Util/ClangUtil.h"
 
 namespace CodeBeacon {
 namespace Callback {
+std::unordered_set<size_t> ClassMatchCallback::fileIDSet;
+std::unordered_set<int64_t> ClassMatchCallback::classIDSet;
 
 void ClassMatchCallback::run(clang::ast_matchers::MatchFinder::MatchResult const& Result) {
   clang::CXXRecordDecl const* pClsDecl = Result.Nodes.getNodeAs<clang::CXXRecordDecl>("id");
-  if(pClsDecl == nullptr) {
-    return;
-  }
-  clang::SourceLocation begLocation = pClsDecl->getSourceRange().getBegin();
-  // 跳过系统头文件
-  if (source_manager().isInSystemHeader(begLocation)) {
-//    std::cout << "skip system header\t";
-    return;
-  }
-
-  std::string filename = source_manager().getFilename(begLocation).str();
+  if(pClsDecl == nullptr) { return; }
+  if (source_manager().isInSystemHeader(pClsDecl->getSourceRange().getBegin())) { return; }
+  std::string filename = source_manager().getFilename(pClsDecl->getSourceRange().getBegin()).str();
   if (!isUserSourceCode(filename)) return;
   if (filename.empty()) return;
-  if (filename.find("code-beacon-gen") == std::string::npos) {
+//  if (filename.find("code-beacon-gen") == std::string::npos) {
+//    return;
+//  }
+
+  // 减少重复分析
+  size_t fileID = std::hash<std::string>{}(filename);
+  if (fileIDSet.find(fileID) != fileIDSet.end()) {
     return;
   }
+  fileIDSet.insert(fileID);
+  int64_t classID = pClsDecl->getID();
+  if (classIDSet.find(classID) != classIDSet.end()) {
+    return;
+  }
+  classIDSet.insert(classID);
+
   if (pClsDecl->isCompleteDefinition()) {
-   cxxmodel::Class clsModel;
-   clsModel.ns = get_tag_namespace(*pClsDecl);
-   clsModel.name = pClsDecl->getNameAsString();
-   clsModel.is_struct = pClsDecl->isStruct();
-   if (pClsDecl->getLocation().isValid()) {
-     clsModel.source_location.file = source_manager().getFilename(pClsDecl->getLocation()).str();
-     clsModel.source_location.line = source_manager().getSpellingLineNumber(pClsDecl->getLocation());
-   }
-   for (auto const* methods : pClsDecl->methods()) {
-     if (methods == nullptr) continue;
-     processMethod(*methods, clsModel);
-   }
+    auto clsModel = ClassGenerator::Create(*pClsDecl);
+    clsModel->source_location = ClassGenerator::toSourceLocationModel(source_manager(), pClsDecl->getLocation());
+    nlohmann::json laocationJson = clsModel->source_location;
+    std::cout << "class = " << clsModel->name << " id = " << clsModel->id << " location = " << laocationJson.dump() <<'\n';
 
-   std::cout << "class = " << clsModel.name << '\n';
-   for(auto const& method : clsModel.methods) {
-     nlohmann::json methodJson = method;
-     std::cout << "\tmethod = " << methodJson.dump() << '\n';
-   }
-//   nlohmann::json json = clsModel;
-//   std::cout << json.dump() << '\n';
-  }
-}
+    for (auto const& field : clsModel->fields) {
+      nlohmann::json fieldJson = field;
+      std::cout << "\tfield = " << fieldJson.dump() << '\n';
+    }
 
-void ClassMatchCallback::processMethod(clang::CXXMethodDecl const& methodDecl, cxxmodel::Class& clsModel) {
-  if (methodDecl.isDefaulted() && !methodDecl.isExplicitlyDefaulted()) {
-    return;
-  }
-  clsModel.methods.push_back({});
-  cxxmodel::Class::Method& methodModel = clsModel.methods.back();
-  methodModel.name = methodDecl.getNameAsString();
-  methodModel.is_pure_virtual = methodDecl.isPure();
-  methodModel.is_virtual = methodDecl.isVirtual();
-  methodModel.is_const = methodDecl.isConst();
-  methodModel.is_defaulted = methodDecl.isDefaulted();
-  methodModel.is_static = methodDecl.isStatic();
-  // ParmVarDecl
-  for (auto const* param : methodDecl.parameters()) {
-    if (param) {
-      processFunctionParameter(*param, methodModel);
+    for(auto const& method : clsModel->methods) {
+      nlohmann::json methodJson = method;
+      std::cout << "\tmethod = " << methodJson.dump() << '\n';
     }
   }
-}
-
-void ClassMatchCallback::processFunctionParameter(clang::ParmVarDecl const& paramDecl, cxxmodel::Class::Method& methodModel) {
-  methodModel.parameters.push_back({});
-  cxxmodel::Class::Method::Parameter& param = methodModel.parameters.back();
-  param.name = paramDecl.getNameAsString();
 }
 
 } // namespace Callback

@@ -62,12 +62,9 @@ namespace cxxmodel {
       Access access{Access::UNKNOWN};
     };
 
-    using ID = size_t;
+    using ID = int64_t;
 
     /* ========== Function ========== */
-    [[nodiscard]] ID id() const {
-      return std::hash<std::string>{}(fullname());
-    }
     [[nodiscard]] std::string fullname() const {
       return join(ns.cbegin(), ns.cend(), ns.sep) + ns.sep + name;
     }
@@ -80,6 +77,7 @@ namespace cxxmodel {
     std::string name;
     SourceLocation source_location;
     bool is_struct{false};
+    ID id;
   };
 
   void to_json(json& j, Access const& access);

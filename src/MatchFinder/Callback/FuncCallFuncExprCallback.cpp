@@ -10,12 +10,7 @@ void FuncCallFuncExprCallback::run(clang::ast_matchers::MatchFinder::MatchResult
       //    if (!node) return;
       std::string filename = CI.getSourceManager().getFilename(node->getSourceRange().getBegin()).str();
       if (!isUserSourceCode(filename)) return;
-      static int cnt = 0;
-      ++cnt;
-      if (cnt > 10 && cnt % 10000) {
-        return;
-      }
-//      std::cout << "func cnt = " << cnt << '\n';
+
       // 获取调用者的函数定义
   //    std::cout << "call expr in " << filename << '\n';
       if (const clang::FunctionDecl *caller = Result.Nodes.getNodeAs<clang::FunctionDecl>("caller")) {

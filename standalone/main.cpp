@@ -1,4 +1,5 @@
-#include "clang/AST/Decl.h"
+#include <iostream>
+#include <filesystem>
 #include "clang/Frontend/CompilerInstance.h"
 #include "clang/Frontend/FrontendActions.h"
 #include "clang/Tooling/Tooling.h"
@@ -27,7 +28,19 @@ int main(int argc, const char **argv) {
     return 1;
   }
   clang::tooling::CommonOptionsParser& OptionsParser = ExpectedParser.get();
-  clang::tooling::ClangTool tool{OptionsParser.getCompilations(), OptionsParser.getSourcePathList() };
+
+  std::vector<std::string> sourceFileList{OptionsParser.getSourcePathList()};
+  std::filesystem::path projectDir{"/Users/dongyilong/clang-llvm/llvm-project/clang-tools-extra/code-beacon-gen"};
+  for (auto const& entry : std::filesystem::recursive_directory_iterator(projectDir)) {
+    if (entry.path().extension() == ".cpp" || entry.path().extension() == ".cc") {
+      sourceFileList.push_back(entry.path().string());
+    }
+  }
+  for (auto const& path : sourceFileList) {
+    std::cout << "source file = " << path << '\n';
+  }
+
+  clang::tooling::ClangTool tool{OptionsParser.getCompilations(), sourceFileList };
 
   return tool.run(clang::tooling::newFrontendActionFactory<CodeBeaconGenFrontendAction>().get());
 }
