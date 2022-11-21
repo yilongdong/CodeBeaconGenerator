@@ -1,8 +1,8 @@
 #pragma once
-#include "clang/AST/ASTContext.h"
-#include "clang/AST/ASTConsumer.h"
-#include "clang/AST/DeclGroup.h"
-#include "clang/Frontend/CompilerInstance.h"
+#include <clang/AST/ASTContext.h>
+#include <clang/AST/ASTConsumer.h>
+#include <clang/AST/DeclGroup.h>
+#include <clang/Frontend/CompilerInstance.h>
 
 #include "Beacon/MatchFinder/CodeBeaconMatchFinder.h"
 

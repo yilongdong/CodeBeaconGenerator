@@ -1,8 +1,8 @@
 #pragma once
 
-#include "clang/ASTMatchers/ASTMatchFinder.h"
-#include "clang/Frontend/CompilerInstance.h"
-#include "clang/AST/ASTConsumer.h"
+#include <clang/ASTMatchers/ASTMatchFinder.h>
+#include <clang/Frontend/CompilerInstance.h>
+#include <clang/AST/ASTConsumer.h>
 
 #include <memory>
 namespace CodeBeacon {

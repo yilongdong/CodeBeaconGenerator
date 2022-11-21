@@ -105,6 +105,8 @@ namespace cxxmodel {
             { "is_defaulted", method.is_defaulted },
             { "is_static", method.is_static },
             { "is_implicit", method.is_implicit },
+            { "is_delete", method.is_delete },
+            { "is_deprecated", method.is_deprecated },
         },
     };
   }
@@ -120,6 +122,8 @@ namespace cxxmodel {
     method.is_defaulted = j.at("is_defaulted").get<bool>();
     method.is_static = j.at("is_static").get<bool>();
     method.is_implicit = j.at("is_implicit").get<bool>();
+    method.is_delete = j.at("is_delete").get<bool>();
+    method.is_deprecated = j.at("is_deprecated").get<bool>();
   }
   void to_json(json& j, Class::Base const& base) {
     j = {
@@ -136,6 +140,7 @@ namespace cxxmodel {
 
   void to_json(json& j, Class const& cls) {
     j = {
+        { "id", cls.id },
         { "name", cls.name },
         { "namespace", cls.ns },
         { "source_location", cls.source_location },
@@ -146,6 +151,7 @@ namespace cxxmodel {
     };
   }
   void from_json(json const& j, Class& cls) {
+    cls.id = j.at("id").get<int64_t>();
     cls.name = j.at("name").get<std::string>();
     cls.ns = j.at("namespace").get<Namespace>();
     cls.source_location = j.at("source_location").get<SourceLocation>();

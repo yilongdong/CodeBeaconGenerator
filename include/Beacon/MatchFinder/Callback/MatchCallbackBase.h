@@ -1,7 +1,7 @@
 #pragma once
 
-#include "clang/ASTMatchers/ASTMatchFinder.h"
-#include "clang/Frontend/CompilerInstance.h"
+#include <clang/ASTMatchers/ASTMatchFinder.h>
+#include <clang/Frontend/CompilerInstance.h>
 
 namespace CodeBeacon {
 namespace Callback {
@@ -16,7 +16,7 @@ protected:
     return CI.getSourceManager();
   }
   virtual bool isUserSourceCode(std::string filename) const {
-    return filename.find("/Library/Developer/CommandLineTools/") != 0;
+    return !filename.empty() && filename.find("/Library/Developer/CommandLineTools/") != 0;
   }
 
 public:

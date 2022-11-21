@@ -50,6 +50,8 @@ namespace cxxmodel {
       bool is_defaulted{false};
       bool is_static{false};
       bool is_implicit{false};
+      bool is_delete{false};
+      bool is_deprecated{false};
       Access access{Access::UNKNOWN};
       std::string name;
       std::string type;
