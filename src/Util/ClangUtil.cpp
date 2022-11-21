@@ -1,7 +1,7 @@
 #include "Beacon/Util/ClangUtil.h"
 #include "Beacon/Model/CXXModel.h"
 #include <algorithm>
-
+// 需要删除
 cxxmodel::Namespace get_tag_namespace(clang::TagDecl const &declaration) {
   cxxmodel::Namespace ns;
 

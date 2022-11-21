@@ -103,5 +103,8 @@ namespace cxxmodel {
 
   void to_json(json& j, Class const& cls);
   void from_json(json const& j, Class& cls);
+
+
+  std::string toPlantUML(Class const& cls);
 }  // namespace cxxmodel
 

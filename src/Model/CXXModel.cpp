@@ -155,5 +155,8 @@ namespace cxxmodel {
     cls.is_struct = j.at("is_struct").get<bool>();
   }
 
+  std::string toPlantUML(Class const& cls) {
+    return "";
+  }
 
 }

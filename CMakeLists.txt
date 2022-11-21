@@ -4,6 +4,10 @@ set(LLVM_LINK_COMPONENTS support)
 
 
 include_directories(include)
+#include_directories(external/spdlog/include)
+
+#add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/external)
+#find_package(spdlog CONFIG REQUIRED)
 
 ############################################################
 # Create a Beacon Model library
@@ -11,7 +15,7 @@ include_directories(include)
 add_library(BeaconModel src/Model/CXXModel.cpp)
 add_library(Beacon::Model ALIAS BeaconModel)
 target_compile_options(BeaconModel PRIVATE -fno-rtti)
-
+#target_link_libraries(BeaconModel PUBLIC ${SPDLOG_LIBS})
 
 ############################################################
 # Create a Beacon Util library
@@ -44,11 +48,14 @@ target_compile_options(BeaconASTConsumer PRIVATE -fno-rtti)
 ############################################################
 # Create a Beacon standalone CLI tool
 ############################################################
+find_package(gflags REQUIRED)
+include_directories (${gflags_INCLUDE_DIR})
 set(ClangLLVMLibs clangAST clangBasic clangFrontend clangSerialization clangTooling)
 add_clang_executable(code-beacon-gen standalone/main.cpp)
 target_link_libraries(code-beacon-gen
         PRIVATE
         ${ClangLLVMLibs}
+        gflags
         Beacon::Model
         Beacon::Util
         Beacon::MatchFinder
